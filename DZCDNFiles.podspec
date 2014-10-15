@@ -9,7 +9,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "DZCDNFiles"
-  s.version          = "0.1.0"
+  s.version          = "1.0.0"
   s.summary          = "DZCDNFiles 是一个通过CDN拉取静态文件的库"
   s.description      = <<-DESC
                        DZCDNFiles 是一个通过CDN拉取静态文件的库,支持各种格式的解析，比如json等
