@@ -10,12 +10,9 @@
 Pod::Spec.new do |s|
   s.name             = "DZCDNFiles"
   s.version          = "0.1.0"
-  s.summary          = "A short description of DZCDNFiles."
+  s.summary          = "DZCDNFiles 是一个通过CDN拉取静态文件的库"
   s.description      = <<-DESC
-                       An optional longer description of DZCDNFiles
-
-                       * Markdown format.
-                       * Don't worry about the indent, we strip it!
+                       DZCDNFiles 是一个通过CDN拉取静态文件的库,支持各种格式的解析，比如json等
                        DESC
   s.homepage         = "https://github.com/yishuiliunian/DZCDNFiles"
   # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
@@ -34,5 +31,5 @@ Pod::Spec.new do |s|
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
+  s.dependency 'DZSinglonFactory', '~> 1.0.0'
 end

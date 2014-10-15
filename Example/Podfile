@@ -2,6 +2,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 
 target 'DZCDNFiles', :exclusive => true do
   pod "DZCDNFiles", :path => "../"
+  pod "DZSinglonFactory", :git => "https://github.com/yishuiliunian/DZSinglonFactory.git"
 end
 
 target 'Tests', :exclusive => true do
