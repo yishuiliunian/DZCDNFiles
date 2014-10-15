@@ -9,7 +9,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "DZCDNFiles"
-  s.version          = "1.0.0"
+  s.version          = "1.0.1"
   s.summary          = "DZCDNFiles 是一个通过CDN拉取静态文件的库"
   s.description      = <<-DESC
                        DZCDNFiles 是一个通过CDN拉取静态文件的库,支持各种格式的解析，比如json等
@@ -30,6 +30,6 @@ Pod::Spec.new do |s|
   }
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
-  s.frameworks = 'UIKit', 'CommonCrypto'
+  s.frameworks = 'UIKit' 
   s.dependency 'DZSinglonFactory', '~> 1.0.0'
 end
