@@ -24,7 +24,8 @@ typedef enum {
     DZCDNFileTypeImagePng,
     DZCDNFileTypeStructXML,
     DZCDNFileTypeStructJSON,
-    DZCDNFileTypeImage
+    DZCDNFileTypeImage,
+    DZCDNFileTypeData
 }DZCDNFileType;
 
 
