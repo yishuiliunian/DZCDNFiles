@@ -2,6 +2,7 @@
 #import "DZCDNAction.h"
 #import "DZCDNJsonAction.h"
 #import "DZCDNImageAction.h"
+#import "DZCDNWavAction.h"
 #import <CommonCrypto/CommonDigest.h>
 
 @interface NSString (MD5)
@@ -75,10 +76,10 @@ NSString* DZCDNActionKey(NSString* key, NSString* type) {
         case DZCDNFileTypeStructJSON:
             return [[DZCDNJsonAction alloc] initWithURL:url checkDuration:duration completion:completion];
         case DZCDNFileTypeImagePng:
-            return nil;
-            break;
         case DZCDNFileTypeImage:
             return [[DZCDNImageAction alloc] initWithURL:url checkDuration:duration completion:completion];
+        case DZCDNFileAudioWAV:
+            return [[DZCDNWavAction alloc] initWithURL:url checkDuration:duration completion:completion];
         default:
             return [[DZCDNAction alloc] initWithURL:url checkDuration:duration completion:completion];
             break;
@@ -105,6 +106,18 @@ NSString* DZCDNActionKey(NSString* key, NSString* type) {
 
 
 #pragma mark -
+
+
++ (NSString*) localFilePathForURL:(NSURL*)url
+{
+    NSString* fileKey = [url.absoluteString MD5Hash];
+    NSString* path = [[DZCDNAction CDNLocalCacheFilesPath] stringByAppendingPathComponent:fileKey];
+    return path;
+}
++ (BOOL) isDownloadedURL:(NSURL*)url
+{
+    return [[NSFileManager defaultManager] fileExistsAtPath:[self localFilePathForURL:url]];
+}
 - (BOOL) isExistLocalData
 {
     NSString* filePaht = self.localFilePath;
@@ -165,7 +178,7 @@ NSString* DZCDNActionKey(NSString* key, NSString* type) {
 {
     NSMutableURLRequest* requst = [NSMutableURLRequest requestWithURL:_url];
     
-    requst.timeoutInterval = 3;
+    requst.timeoutInterval = 20;
     
     NSData* data = [NSURLConnection sendSynchronousRequest:requst returningResponse:nil error:error];
     if (*error) {
@@ -192,6 +205,10 @@ NSString* DZCDNActionKey(NSString* key, NSString* type) {
     }
 }
 
+- (void) localized:(NSData*)data decodeObject:(id)object
+{
+   [data writeToFile:self.localFilePath atomically:YES];
+}
 - (void) main
 {
     @autoreleasepool {
@@ -211,7 +228,7 @@ NSString* DZCDNActionKey(NSString* key, NSString* type) {
             [self sendCompleteBlock:nil  error:error];
             return;
         }
-        [_data writeToFile:self.localFilePath atomically:YES];
+        [self localized:_data decodeObject:object];
         [self setLastCheckDate:[NSDate date]];
         [self sendCompleteBlock:object error:error];
     }

@@ -25,7 +25,8 @@ typedef enum {
     DZCDNFileTypeStructXML,
     DZCDNFileTypeStructJSON,
     DZCDNFileTypeImage,
-    DZCDNFileTypeData
+    DZCDNFileTypeData,
+    DZCDNFileAudioWAV
 }DZCDNFileType;
 
 
@@ -51,9 +52,11 @@ typedef void(^DZCDNPullDataCompletionBlock)(id serverObject, NSError* error);
                               WithURL:(NSURL *)url
                         checkDuration:(NSTimeInterval)duration
                            completion:(DZCDNPullDataCompletionBlock)completion;
-
++ (NSString*) localFilePathForURL:(NSURL*)url;
++ (BOOL) isDownloadedURL:(NSURL*)url;
 - (instancetype) initWithURL:(NSURL*)url checkDuration:(NSTimeInterval)duration completion:(DZCDNPullDataCompletionBlock)completion;
 - (id) decodeCDNFileData:(NSData*)data error:(NSError* __autoreleasing*)error;
+- (void) localized:(NSData*)data decodeObject:(id)object;
 
 @end
 

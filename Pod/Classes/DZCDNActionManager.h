@@ -14,4 +14,7 @@ typedef void(^CDNImageDownloadedBlock)(UIImage*image, NSError*error);
 @interface DZCDNActionManager : NSObject
 + (DZCDNActionManager*) shareManager;
 - (void) downloadImage:(NSString*)url downloaded:(CDNImageDownloadedBlock)completion;
++ (NSString*) localFilePathForURL:(NSURL*)url;
++ (BOOL) isDownloadedURL:(NSURL*)url;
+- (void) downloadWAVAudio:(NSString *)url downloaded:(CDNImageDownloadedBlock)completion;
 @end
