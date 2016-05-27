@@ -15,12 +15,6 @@
     return data;
 }
 
-- (void) localized:(NSData *)data decodeObject:(id)object
-{
-    if ([object isKindOfClass:[NSData class]]) {
-        NSString* path = DZTempFilePathWithExtension(@"amr");
-        BOOL writeResult = [data writeToFile:self.localFilePath atomically:YES];
-    }
-}
+
 
 @end

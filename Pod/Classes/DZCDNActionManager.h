@@ -8,13 +8,12 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-
-typedef void(^CDNImageDownloadedBlock)(UIImage*image, NSError*error);
-
+#import "DZCDNDownloadObserver.h"
 @interface DZCDNActionManager : NSObject
 + (DZCDNActionManager*) shareManager;
-- (void) downloadImage:(NSString*)url downloaded:(CDNImageDownloadedBlock)completion;
+- (void) downloadImage:(NSString*)url downloadedWithLisenter:(id<DZCDNActionListener>)listener;
 + (NSString*) localFilePathForURL:(NSURL*)url;
 + (BOOL) isDownloadedURL:(NSURL*)url;
-- (void) downloadWAVAudio:(NSString *)url downloaded:(CDNImageDownloadedBlock)completion;
+- (BOOL) isDownloaingForURL:(NSURL*)url;
+- (void) downloadWAVAudio:(NSString *)url downloadedWithLisenter:(id<DZCDNActionListener>)listener;
 @end

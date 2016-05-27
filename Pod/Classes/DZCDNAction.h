@@ -17,7 +17,7 @@
 //
 
 #import "DZCDNAction.h"
-
+#import "DZCDNDownloadObserver.h"
 
 typedef enum {
     DZCDNFileTypeImageJpeg,
@@ -30,33 +30,30 @@ typedef enum {
 }DZCDNFileType;
 
 
-typedef void(^DZCDNPullDataCompletionBlock)(id serverObject, NSError* error);
+
 
 
 @interface DZCDNAction : NSOperation
-@property (nonatomic, strong, readonly) NSData* data;
 /**
  *  价差更新的时间间隔，以秒为单位
  */
 @property (nonatomic, assign) NSTimeInterval checkDuration;
+
 /**
  *  标识改向CDN拉取信息的key
  */
-@property (nonatomic, strong) NSURL* url;
+@property (nonatomic, strong, readonly) NSURL* url;
 @property (nonatomic, strong, readonly) NSString* localFilePath;
 @property (nonatomic, assign, readonly) BOOL isExistLocalData;
-@property (nonatomic, strong) DZCDNPullDataCompletionBlock actionCompletionBlock;
-
+@property (nonatomic, strong, readonly) DZCDNDownloadObserver* observer;
 
 + (DZCDNAction*) CDNActionForFileType:(DZCDNFileType)type
                               WithURL:(NSURL *)url
-                        checkDuration:(NSTimeInterval)duration
-                           completion:(DZCDNPullDataCompletionBlock)completion;
+                        checkDuration:(NSTimeInterval)duration;
 + (NSString*) localFilePathForURL:(NSURL*)url;
 + (BOOL) isDownloadedURL:(NSURL*)url;
-- (instancetype) initWithURL:(NSURL*)url checkDuration:(NSTimeInterval)duration completion:(DZCDNPullDataCompletionBlock)completion;
+- (instancetype) initWithURL:(NSURL*)url checkDuration:(NSTimeInterval)duration;
 - (id) decodeCDNFileData:(NSData*)data error:(NSError* __autoreleasing*)error;
-- (void) localized:(NSData*)data decodeObject:(id)object;
 
 @end
 

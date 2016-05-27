@@ -4,7 +4,7 @@
 #import "DZCDNImageAction.h"
 #import "DZCDNWavAction.h"
 #import <CommonCrypto/CommonDigest.h>
-
+#import "DZFileUtils.h"
 @interface NSString (MD5)
 
 @end
@@ -70,18 +70,17 @@ NSString* DZCDNActionKey(NSString* key, NSString* type) {
 + (DZCDNAction*) CDNActionForFileType:(DZCDNFileType)type
                               WithURL:(NSURL *)url
                         checkDuration:(NSTimeInterval)duration
-                           completion:(DZCDNPullDataCompletionBlock)completion
 {
     switch (type) {
         case DZCDNFileTypeStructJSON:
-            return [[DZCDNJsonAction alloc] initWithURL:url checkDuration:duration completion:completion];
+            return [[DZCDNJsonAction alloc] initWithURL:url checkDuration:duration ];
         case DZCDNFileTypeImagePng:
         case DZCDNFileTypeImage:
-            return [[DZCDNImageAction alloc] initWithURL:url checkDuration:duration completion:completion];
+            return [[DZCDNImageAction alloc] initWithURL:url checkDuration:duration ];
         case DZCDNFileAudioWAV:
-            return [[DZCDNWavAction alloc] initWithURL:url checkDuration:duration completion:completion];
+            return [[DZCDNWavAction alloc] initWithURL:url checkDuration:duration ];
         default:
-            return [[DZCDNAction alloc] initWithURL:url checkDuration:duration completion:completion];
+            return [[DZCDNAction alloc] initWithURL:url checkDuration:duration ];
             break;
     }
 }
@@ -91,16 +90,14 @@ NSString* DZCDNActionKey(NSString* key, NSString* type) {
 #pragma mark init
 - (instancetype) initWithURL:(NSURL *)url
                checkDuration:(NSTimeInterval)duration
-                  completion:(DZCDNPullDataCompletionBlock)completion
 {
     self = [super init];
     if (!self) {
         return self;
     }
     [self setUrl:url];
-    
+    _observer = [[DZCDNDownloadObserver alloc] initWithOriginURL:url];
     _checkDuration = duration;
-    _actionCompletionBlock = completion;
     return self;
 }
 
@@ -176,15 +173,26 @@ NSString* DZCDNActionKey(NSString* key, NSString* type) {
 
 - (BOOL) pullCDNData:(NSError *__autoreleasing*)error
 {
-    NSMutableURLRequest* requst = [NSMutableURLRequest requestWithURL:_url];
     
-    requst.timeoutInterval = 20;
-    
-    NSData* data = [NSURLConnection sendSynchronousRequest:requst returningResponse:nil error:error];
-    if (*error) {
+    __block NSError* localError= nil;
+    dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+    NSURLSessionDownloadTask* task = [[NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]] downloadTaskWithURL:_url completionHandler:^(NSURL * _Nullable location, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        if (error) {
+            localError = error;
+        } else {
+            DZMoveFile(location.path, self.localFilePath, &localError);
+        }
+        dispatch_semaphore_signal(sem);
+    }];
+    [task resume];
+    dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+    if (localError) {
+        if (error != NULL) {
+            *error = localError;
+        }
         return NO;
     }
-    _data = data;
+
     return YES;
 }
 
@@ -196,41 +204,45 @@ NSString* DZCDNActionKey(NSString* key, NSString* type) {
     return nil;
 }
 
-- (void) sendCompleteBlock:(id)observer error:(NSError*)error
+- (void) onSuccessDecodeObject:(id)object
 {
-    if (_actionCompletionBlock) {
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            _actionCompletionBlock(observer , error);
-        });
-    }
+    dispatch_sync(dispatch_get_main_queue(), ^{
+    });
 }
 
-- (void) localized:(NSData*)data decodeObject:(id)object
+- (void) onSuccessFile:(NSString*)filePath
 {
-   [data writeToFile:self.localFilePath atomically:YES];
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        [self.observer onSuccessWithLocalFilePath:self.localFilePath];
+    });
+}
+- (void) onError:(NSError*)error
+{
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        [self.observer onError:error];
+    });
+}
+
+- (void) onSuccess
+{
+    [self onSuccessFile:self.localFilePath];
 }
 - (void) main
 {
     @autoreleasepool {
         if (![self shouldPullData]) {
-            _data = [NSData dataWithContentsOfFile:self.localFilePath];
+            [self onSuccess];
         } else {
             NSError* error = nil;
             if(![self pullCDNData:&error]) {
-                [self sendCompleteBlock:nil error:error];
+                [self onError:error];
                 return;
             }
         }
         //
         NSError* error = nil;
-        id object =[self decodeCDNFileData:_data error:&error];
-        if (error) {
-            [self sendCompleteBlock:nil  error:error];
-            return;
-        }
-        [self localized:_data decodeObject:object];
         [self setLastCheckDate:[NSDate date]];
-        [self sendCompleteBlock:object error:error];
+        [self onSuccess];
     }
 }
 @end
