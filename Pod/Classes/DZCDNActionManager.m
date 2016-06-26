@@ -61,6 +61,16 @@
     return [DZCDNAction isDownloadedURL:url];
 }
 
+
+- (BOOL) cacheFilePath:(NSString*)filePath forURL:(NSString*)url
+{
+    if (![[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
+        return NO;
+    }
+    NSString* aimpath = [DZCDNActionManager localFilePathForURL:[NSURL URLWithString:url]];
+    return [[NSFileManager defaultManager] copyItemAtPath:filePath toPath:aimpath error:nil];
+}
+
 - (void) downloadFile:(NSString*)url type:(DZCDNFileType)type  withListener:(id<DZCDNActionListener>)listener
 {
     if (!url) {

@@ -16,4 +16,5 @@
 + (BOOL) isDownloadedURL:(NSURL*)url;
 - (BOOL) isDownloaingForURL:(NSURL*)url;
 - (void) downloadWAVAudio:(NSString *)url downloadedWithLisenter:(id<DZCDNActionListener>)listener;
+- (BOOL) cacheFilePath:(NSString*)filePath forURL:(NSString*)url;
 @end
