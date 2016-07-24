@@ -15,6 +15,7 @@
     if (!self) {
         return self;
     }
+    _originURL = originURL;
     _lisenters = [NSMutableArray new];
     return self;
 }
