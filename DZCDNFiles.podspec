@@ -31,7 +31,6 @@ Pod::Spec.new do |s|
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   s.frameworks = 'UIKit'
-  s.dependency 'DZSinglonFactory', '~> 1.0.0'
-  s.dependency 'VoiceConvert'
+  s.dependency 'DZSinglonFactory'
   s.dependency 'DZFileUtils'
 end
