@@ -6,58 +6,81 @@
 //
 //
 
+#import <AMapSearchKit/AMapSearchKit.h>
 #import "DZCDNDownloadObserver.h"
+#import "DZObjectProxy.h"
+
+@interface DZCDNDownloadObserver ()
+{
+    NSRecursiveLock * _observerLock;
+}
+@end
 
 @implementation DZCDNDownloadObserver
+
+- (instancetype)init {
+    self = [super init];
+    if (!self) {
+        return  self;
+    }
+    _observerLock = [NSRecursiveLock new];
+    _lisenters = [NSMutableArray new];
+    return self;
+}
 - (instancetype) initWithOriginURL:(NSURL*)originURL
 {
-    self = [super init];
+    self = [self init];
     if (!self) {
         return self;
     }
     _originURL = originURL;
-    _lisenters = [NSMutableArray new];
     return self;
 }
 
 - (void) addListener:(id<DZCDNActionListener>)lisenter
 {
-    for (NSValue* value  in _lisenters) {
-        if ([value nonretainedObjectValue] == lisenter) {
+    [_observerLock tryLock];
+    for (id<DZCDNActionListener> value  in _lisenters) {
+        if ([value isEqual:lisenter]) {
             return;
         }
     }
-    NSValue* value = [NSValue valueWithNonretainedObject:lisenter];
-    [_lisenters addObject:value];
+    DZWeakProxy * weakProxy = [DZWeakProxy proxyWithTarget:lisenter];
+    [_lisenters addObject:weakProxy];
+    [_observerLock unlock];
 }
 
 - (void) removeListener:(id<DZCDNActionListener>)lisenter
 {
+    [_observerLock tryLock];
     NSArray* copyedListeners = [_lisenters copy];
-    for (NSValue* value in copyedListeners) {
-        if ([value nonretainedObjectValue] == lisenter) {
+    for (id<DZCDNActionListener> value in copyedListeners) {
+        if ([value isEqual:lisenter]) {
             [_lisenters removeObject:value];
         }
     }
+    [_observerLock unlock];
 }
 
 - (void) onError:(NSError*)error
 {
-    for (NSValue* value in _lisenters) {
-        id<DZCDNActionListener>listener  = [value nonretainedObjectValue];
+    [_observerLock tryLock];
+    for (id<DZCDNActionListener> listener in _lisenters) {
         if ([listener respondsToSelector:@selector(CDNActionWithURL:didFinishWith:error:)]) {
             [listener CDNActionWithURL:self.originURL didFinishWith:nil error:error];
         }
     }
+    [_observerLock unlock];
 }
 
 - (void) onSuccessWithLocalFilePath:(NSString*)filePath
 {
-    for (NSValue* value in _lisenters) {
-        id<DZCDNActionListener>listener  = [value nonretainedObjectValue];
+    [_observerLock tryLock];
+    for (id<DZCDNActionListener> listener in _lisenters) {
         if ([listener respondsToSelector:@selector(CDNActionWithURL:didFinishWith:error:)]) {
             [listener CDNActionWithURL:self.originURL didFinishWith:filePath error:nil];
         }
     }
+    [_observerLock unlock];
 }
 @end
