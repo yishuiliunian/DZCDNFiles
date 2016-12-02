@@ -39,7 +39,7 @@
 
 - (void) addListener:(id<DZCDNActionListener>)lisenter
 {
-    [_observerLock tryLock];
+    [_observerLock lock];
     for (id<DZCDNActionListener> value  in _lisenters) {
         if ([value isEqual:lisenter]) {
             return;
@@ -52,7 +52,7 @@
 
 - (void) removeListener:(id<DZCDNActionListener>)lisenter
 {
-    [_observerLock tryLock];
+    [_observerLock lock];
     NSArray* copyedListeners = [_lisenters copy];
     for (id<DZCDNActionListener> value in copyedListeners) {
         if ([value isEqual:lisenter]) {
@@ -64,7 +64,7 @@
 
 - (void) onError:(NSError*)error
 {
-    [_observerLock tryLock];
+    [_observerLock lock];
     for (id<DZCDNActionListener> listener in _lisenters) {
         if ([listener respondsToSelector:@selector(CDNActionWithURL:didFinishWith:error:)]) {
             [listener CDNActionWithURL:self.originURL didFinishWith:nil error:error];
@@ -75,7 +75,7 @@
 
 - (void) onSuccessWithLocalFilePath:(NSString*)filePath
 {
-    [_observerLock tryLock];
+    [_observerLock lock];
     for (id<DZCDNActionListener> listener in _lisenters) {
         if ([listener respondsToSelector:@selector(CDNActionWithURL:didFinishWith:error:)]) {
             [listener CDNActionWithURL:self.originURL didFinishWith:filePath error:nil];
